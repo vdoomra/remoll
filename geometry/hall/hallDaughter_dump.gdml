@@ -12,16 +12,20 @@
   &matrices;
 
   <constant name="i2cm" value="2.54"/>
-  <constant name="width_mother" value="75000."/>
-  <constant name="height_mother" value="50000."/>
-  <constant name="length_mother" value="125000."/>
+  <constant name="width_mother" value="75000.+90000+10000"/>
+  <constant name="height_mother" value="50000.+40000"/>
+  <constant name="length_mother" value="125000.+15000+40000"/>
 
   <constant name="radius_of_cylwall" value="26517.6"/><!--25460."/>-->
   <constant name="hall_cylwall_radius" value="radius_of_cylwall/10"/>
-  <constant name="thick_cylwall" value="1487."/>  
+
+  <!--<constant name="thick_cylwall" value="1487."/>--> <!--old value-->
+  <constant name="thick_cylwall" value="1559.4"/> <!--From Fluka-->
+  
   <constant name="hall_cylwall_thickness" value="thick_cylwall/10"/>  
   <constant name="hall_floor_distance" value="120.5*i2cm"/>
   <constant name="height_cylwall" value="17770."/>
+   <!--<constant name="height_cylwall" value="14847.4"/>-->
   <constant name="hall_cylwall_height" value="height_cylwall/10"/>
   <constant name="bottom_cylwall" value="-4470."/>  
 
@@ -29,8 +33,8 @@
   <constant name="radius_topwall_in" value="54027.8"/>
   <constant name="center_topwall" value="-34352.6"/> 
   <constant name="center_cylwall" value="1*(height_cylwall/2+bottom_cylwall)"/>
-  <constant name="trans_topwall" value="radius_topwall_out-(-center_topwall+bottom_cylwall+height_cylwall)"/> 
-
+  <!--<constant name="trans_topwall" value="radius_topwall_out-(-center_topwall+bottom_cylwall+height_cylwall)"/>--> 
+  <constant name="trans_topwall" value="73966.09-(-center_topwall+bottom_cylwall+height_cylwall)"/> 
   <constant name="radius_max_cylHallDet" value="radius_of_cylwall - 10"/>
   <constant name="height_cylHallDet" value="height_cylwall - thick_cylwall - 1"/>
 
@@ -52,7 +56,7 @@
     <constant name="dump_wall_thickness" value="12.0*i2cm"/>
     <constant name="dump_width" value="84.*i2cm + 2.*dump_wall_thickness"/>
     <constant name="dump_height" value="120.*i2cm + 2.*dump_wall_thickness"/>
-    <constant name="dump_length" value="1200.*i2cm + 1.*dump_wall_thickness"/>
+    <constant name="dump_length" value="1200.*i2cm + 1.*dump_wall_thickness - 200"/>
     <constant name="dumpUSSub_width" value="dump_width - 2.*dump_wall_thickness"/>
     <constant name="dumpUSSub_height" value="dump_height - 2.*dump_wall_thickness"/>
     <constant name="dumpUSSub_length" value="720.*i2cm"/>
@@ -236,15 +240,34 @@
 	  rmax="radius_max_cylHallDet - 0.2" rmin="0" startphi="0" z="0.1"/>
 
     <!--Hall A top wall -->
-  <sphere aunit="deg" startphi="0" deltaphi="360" starttheta="0" deltatheta="180" lunit="mm" name="hall_top_shell"  
+
+  <!--<sphere aunit="deg" startphi="0" deltaphi="360" starttheta="0" deltatheta="180" lunit="mm" name="hall_top_shell"  
 	  rmin="radius_topwall_in" rmax="radius_topwall_out"/>
   <tube aunit="deg" startphi="0" deltaphi="360" lunit="mm" name="hall_top_sub" rmin="0.0" 
-	rmax="radius_topwall_out+10" z="2*radius_topwall_out" />
+	rmax="radius_topwall_out+10" z="2*radius_topwall_out" />-->
+
+     <sphere aunit="deg" startphi="0" deltaphi="360" starttheta="0" deltatheta="180" lunit="mm" name="hall_top_shell_inner"  
+	  rmin="0" rmax="70877.47"/>
+
+     <sphere aunit="deg" startphi="0" deltaphi="360" starttheta="0" deltatheta="180" lunit="mm" name="hall_top_shell_outer"  
+	  rmin="0" rmax="73966.09"/>
+
+  
+     <tube aunit="deg" startphi="0" deltaphi="360" lunit="mm" name="hall_top_sub" rmin="0.0" 
+	rmax="73966.09 + 10" z="2*73966.09" />  
+
  
-  <subtraction name ="topwall_solid">
-      <first ref="hall_top_shell"/>
+      <subtraction name ="topwall_sphere_solid">
+      <first ref="hall_top_shell_outer"/>
+      <second ref="hall_top_shell_inner"/>
+      <position name="sphere_shift" unit="mm" y="2700"/>
+      </subtraction>
+
+     <subtraction name ="topwall_solid">
+      <first ref="topwall_sphere_solid"/>
       <second ref="hall_top_sub"/>
-      <positionref ref="topwallTrans_1"/>
+      <rotation name="tube_rotation" unit="deg" x="90"/>
+      <position name="tube_shift" unit="mm" y="-5536.09-650"/>
   </subtraction>
 
   <tube aunit="deg" startphi="0" deltaphi="360" lunit="mm" name="out_cylwall" rmin="0.0" rmax="radius_of_cylwall+1.*thick_cylwall" z="height_cylwall" />
@@ -257,6 +280,7 @@
       <second ref="in_cylwall"/>
       <positionref ref="cylwallTrans_1"/>
   </subtraction>
+
   <subtraction name ="cylwall_hole">
       <first ref="cylwall_full"/>
       <second ref="hall_dumphole"/> 
@@ -265,13 +289,14 @@
   </subtraction>
 
   <!--Hall A top wall detector -->
-  <sphere aunit="deg" startphi="0" deltaphi="360" starttheta="0" deltatheta="180" lunit="mm" name="halldet_top_shell"  rmin="radius_topwall_out+10" rmax="radius_topwall_out+10+1"/>
-  <tube aunit="deg" startphi="0" deltaphi="360" lunit="mm" name="halldet_top_sub" rmin="0.0" rmax="radius_topwall_out+11" z="2*(radius_topwall_out+10+1)" />
+  <sphere aunit="deg" startphi="0" deltaphi="360" starttheta="0" deltatheta="180" lunit="mm" name="halldet_top_shell"  rmin="73966.09+10" rmax="73966.09+10+1"/>
+  <tube aunit="deg" startphi="0" deltaphi="360" lunit="mm" name="halldet_top_sub" rmin="0.0" rmax="73966.09+11" z="2*(73966.09+10+1)" />
  
   <subtraction name ="topwalldet_solid">
       <first ref="halldet_top_shell"/>
       <second ref="halldet_top_sub"/>
-      <positionref ref="topwallTrans_1"/>
+      <!--<positionref ref="topwallTrans_1"/>-->
+      <position name="det_trans" unit="mm" z="5536.09+650+30"/>
   </subtraction>
 
   <!-- Dump Enclosure -->
@@ -304,6 +329,15 @@
       <positionref ref="dumpDSSub2_trans"/>
       <rotationref ref="identity"/>
     </subtraction>
+
+    <box name="dumpcov" unit="mm" x="11277.6" y="8640" z="17120"/>  <!--Dump Cover-->
+    <box name="dumphole" unit="mm" x="(dump_width+0.1)*10" y="(dump_height+0.5)*10" z="(dump_length+0.1)*10"/>  <!--Hole in dump cover-->
+
+   <subtraction name="dumpcov_solid">
+   <first ref="dumpcov"/>
+   <second ref="dumphole"/>
+   <position name="dumphole_pos" unit="mm" z="-(dump_length/2)*10 +1520+1000"/>
+   </subtraction> 
 
 
     <!-- Dump Temporary Shielding Blocks -->
@@ -437,6 +471,123 @@
       <positionref ref="tubeDumpWaterTank_trans"/>
       <rotationref ref="identity"/>
     </subtraction>
+
+
+
+  <!--Dirth Layer Outside the Hall-->
+
+   <tube aunit="deg" startphi="0" deltaphi="360" lunit="mm" name="dirth_tube" rmin="0.0" 
+	rmax="80000" z="8050+2922.6+1000" />
+
+  <sphere aunit="deg" lunit="mm" name="dirth_sphere" rmin="0" rmax="79753.2" deltaphi="360" deltatheta="180"/>
+
+  <union name ="union_dirth">
+      <first ref="dirth_tube"/>
+      <second ref="dirth_sphere"/>
+      <position name="union_position" unit="mm" z="79753.2-19606.9"/>
+  </union>
+
+ <tube aunit="deg" startphi="0" deltaphi="360" lunit="mm" name="Tube1" rmin="0.0"
+        rmax="79753.2+10" z="2*79753.2" />
+
+  <subtraction name ="sub_dirth">
+      <first ref="union_dirth"/>
+      <second ref="Tube1"/>
+      <position name="sub_dirth_pos" unit="mm" z="79753.2+4025+2922.6/2+1000/2"/>
+  </subtraction>
+
+  <sphere aunit="deg" lunit="mm" name="outer_shell_out" rmin="0" rmax="79753.2" deltaphi="360" deltatheta="180"/>
+
+ <sphere aunit="deg" lunit="mm" name="outer_shell_in" rmin="0" rmax="79753.2" deltaphi="360" deltatheta="180"/>
+
+ <subtraction name ="sub_outer_sphere">
+      <first ref="outer_shell_out"/>
+      <second ref="outer_shell_in"/>
+      <position name="outer_sphere_position" unit="mm" z="1000"/>
+ </subtraction>
+
+ <tube aunit="deg" startphi="0" deltaphi="360" lunit="mm" name="Tube2" rmin="0.0"
+        rmax="79753.2+10" z="2*79753.2" />
+
+  <subtraction name ="sub_solid_outer_sphere">
+      <first ref="sub_outer_sphere"/>
+      <second ref="Tube2"/>
+      <position name="subtraction_position2" unit="mm" z="5600.6"/>
+  </subtraction>
+
+   <subtraction name ="sub_outlayer">  
+      <first ref="sub_dirth"/>
+      <second ref="sub_solid_outer_sphere"/>
+      <position name="subtraction_position3" unit="mm" z="79753.2-19606.9"/>
+  </subtraction>
+
+ <box name="above_dump" unit="mm" x="17144" y="5800" z="28000"/>
+
+ <union name="sub_final_outlayer">  <!--Final Outlayer-->
+  <first ref="sub_outlayer"/>
+  <second ref="above_dump"/>
+  <rotation name="above_dump_roation" unit="deg" x="90"/>
+  <position name="aove_dump_position" unit="mm" y="56000-4000" z="-4900"/>
+ </union> 
+
+  <sphere aunit="deg" startphi="0" deltaphi="360" starttheta="0" deltatheta="180" lunit="mm" name="hall_top_shell_outer_dirth"  
+	  rmin="0" rmax="73966.09+2"/>
+
+     <tube aunit="deg" startphi="0" deltaphi="360" lunit="mm" name="hall_top_sub_dirth" rmin="0.0" 
+	rmax="73966.09 + 10" z="2*73966.09" />  
+
+     <subtraction name ="topwall_dirth_solid">  <!--the spherical part of hall on the top-->
+      <first ref="hall_top_shell_outer_dirth"/>
+      <second ref="hall_top_sub_dirth"/>
+      <position name="tube_shift_dirth" unit="mm" z="5536.09+650"/>
+  </subtraction>
+
+  <tube aunit="deg" startphi="0" deltaphi="360" lunit="mm" name="out_cylwall_dirth" rmin="0.0" rmax="radius_of_cylwall+thick_cylwall+10" z="height_cylwall+500" />  <!--Cylindrial surface of the wall-->
+
+  <box name="dump_dirth" unit="mm" x="2743.2+20" y="3657.6+20" z="28784.8+2"/>
+
+  <box name="dumpcov_dirth" unit="mm" x="11277.6+2" y="8640+300" z="17120+200"/>
+
+  <box name="detLeft" unit="mm" x="100000" y="100000" z="1"/>
+
+   <multiUnion name="halldirth_solid">
+
+   <multiUnionNode name ="node_sphere">
+   <solid ref="out_cylwall_dirth"/>
+   </multiUnionNode>
+
+  <multiUnionNode name="node_cylwall">
+   <solid ref="topwall_dirth_solid"/>
+   <position name="topwall_pos" unit="mm" z="73966.09-height_cylwall/2-5536.09-650+1-250"/>
+  </multiUnionNode>
+
+   <multiUnionNode name="node_dump">
+    <solid ref="dump_dirth"/>
+    <rotation name="dump_rotation" unit="deg" x="90"/> 
+    <position name="dump_pos" unit="mm" y="radius_of_cylwall + 28784.8/2" z="3493.7+1600-280"/>
+  </multiUnionNode>
+
+   <multiUnionNode name="node_dumpcov">
+     <solid ref="dumpcov_dirth"/>
+     <rotation name="dumpcov_rotation" unit="deg" x="90"/>
+     <position name="dumpcov_pos" unit="mm"  y="57480-4000-650" z="3238.7+1600-300"/>
+  </multiUnionNode>
+
+  </multiUnion>
+
+  <subtraction name ="dirth_solid">  <!--the spherical part of hall on the top-->
+      <first ref="sub_final_outlayer"/>
+      <second ref="halldirth_solid"/>
+       <position name="position" unit="mm" z="-2748.71-100"/>
+  </subtraction>
+
+
+ <!--Boundary Dose Detectors-->
+
+ <box name="detleftright_solid" unit="mm" x="160000" y="(8050+3922.6)/2 + 19606.9+10000-1" z="1"/>
+ <box name="dettop_solid" unit="mm" x="160000" y="1" z="163000"/> 
+ 
+
  
   </solids>
 
@@ -466,17 +617,39 @@
       <auxiliary auxtype="DetNo" auxvalue="107"/>
     </volume>
 
+   <volume name="detleft_logic">
+      <materialref ref="Vacuum"/>
+      <solidref ref="detleftright_solid"/>
+      <auxiliary auxtype="Alpha" auxvalue="0.1"/>
+      <auxiliary auxtype="SensDet" auxvalue="planeDet"/>
+      <auxiliary auxtype="DetNo" auxvalue="108"/>
+    </volume>
+
+   <volume name="detright_logic">
+      <materialref ref="Vacuum"/>
+      <solidref ref="detleftright_solid"/>
+      <auxiliary auxtype="Alpha" auxvalue="0.1"/>
+      <auxiliary auxtype="SensDet" auxvalue="planeDet"/>
+      <auxiliary auxtype="DetNo" auxvalue="109"/>
+    </volume>
+
+   <volume name="dettop_logic">
+      <materialref ref="Vacuum"/>
+      <solidref ref="dettop_solid"/>
+      <auxiliary auxtype="Alpha" auxvalue="0.1"/>
+      <auxiliary auxtype="SensDet" auxvalue="planeDet"/>
+      <auxiliary auxtype="DetNo" auxvalue="110"/>
+    </volume>
+
 
     <volume name="topwall_logic">
       <materialref ref="Concrete"/>
       <solidref ref="topwall_solid"/>
-      <auxiliary auxtype="Alpha" auxvalue="0.1"/>
     </volume>
 
     <volume name="cylwall_logic">
       <materialref ref="Concrete"/>
       <solidref ref="cylwall_hole"/>
-      <auxiliary auxtype="Alpha" auxvalue="0.1"/>
     </volume>
 
 
@@ -485,6 +658,14 @@
       <materialref ref="Concrete"/>
       <solidref ref="dump_solid"/>
       <auxiliary auxtype="Color" auxvalue="white"/>
+      <auxiliary auxtype="Alpha" auxvalue="0.1"/>
+    </volume>
+
+  
+    <volume name="dumpcov_logic">
+      <materialref ref="Concrete"/>
+      <solidref ref="dumpcov_solid"/>
+      <auxiliary auxtype="Color" auxvalue="gray"/>
       <auxiliary auxtype="Alpha" auxvalue="0.1"/>
     </volume>
 
@@ -635,9 +816,23 @@
       <auxiliary auxtype="Alpha" auxvalue="0.1"/>
     </volume>
 
+
+     <volume name="dirth_logic">
+      <materialref ref="Soil"/>
+      <solidref ref="dirth_solid"/>
+      <auxiliary auxtype="Color" auxvalue="Brown"/>
+    </volume>
+
+
     <volume name="logicHall">
-      <materialref ref="Vacuum"/>  <!-- air ??? -->
+      <materialref ref="G4_AIR"/>  <!-- air ??? -->
       <solidref ref="boxHallMother"/>
+
+      <physvol name="dirth_PV">
+        <volumeref ref="dirth_logic"/>
+        <rotation name="d_rot" unit="deg" x="-90"/>
+        <position name="d_pos" unit="mm" y="1000+1600/2-300"/>
+      </physvol>
 
       <physvol name="hallVerticalWallDet">
         <volumeref ref="hallVerticalWallDet_logic"/>
@@ -653,14 +848,18 @@
 
       <physvol name="topWall">
         <volumeref ref="topwall_logic"/>
-        <positionref ref="topwall_center"/>
-        <rotationref ref="scRot_1"/>
+        <position name="topwall_position" unit="mm" y="-73966.09+5536.09+650+height_cylwall/2+3*thick_cylwall-250"/>
+        <!--<rotation name="tube_rotation" unit="deg" x="90"/>-->
+        <!--<positionref ref="topwallcenter"/>-->
+        <!--<rotationref ref="scRot_1"/>-->
       </physvol>
 
       <physvol name="topWallOuterDet">
         <volumeref ref="topWallOuterDet_logic"/>
         <positionref ref="topwall_center"/>
-        <rotationref ref="scRot_1"/>
+        <!--<rotationref ref="scRot_1"/>-->
+        <rotation name="det_rot" unit="deg" x="-90"/>
+        <position name="det_position" unit="mm" y="-73966.09+5536.09+650+height_cylwall/2+3*thick_cylwall-150+30"/>
       </physvol>
 
       <physvol name="cylwall">
@@ -674,8 +873,13 @@
         <volumeref ref="dump_logic"/>
         <positionref ref="dump_center"/>
       </physvol>
-      
-      <physvol name="krytpoTop_phys">
+
+    <physvol name="dumpcov_PV">
+        <volumeref ref="dumpcov_logic"/>
+        <position name="dumpcov_PV_pos" unit="mm" x="0" y="-150" z="53840-1000"/>
+      </physvol>
+  
+      <!--<physvol name="krytpoTop_phys">
        <volumeref ref="krytpoTop_log"/>
        <position name="kryptoTop_pos" unit="cm" x="0" y="60.05*i2cm" z="dump_center_z"/>
       </physvol>
@@ -698,6 +902,21 @@
       <physvol name="krytpoEndDS_phys">
        <volumeref ref="krytpoEndDS_log"/>
        <position name="kryptoEndDS_pos" unit="cm" x="0" y="-15.5*i2cm" z="2256.5*i2cm"/>
+      </physvol>-->
+
+     <physvol name="detleft_phys">
+       <volumeref ref="detleft_logic"/>
+       <position name="detleft_pos" unit="mm" x="0" y="(19606.9+10000)/2 - 2500" z="-82000"/>
+      </physvol>
+
+     <physvol name="detright_phys">
+       <volumeref ref="detright_logic"/>
+       <position name="detright_pos" unit="mm" x="0" y="(19606.9+10000)/2 - 2500" z="82000"/>
+      </physvol>
+
+     <physvol name="dettop_phys">
+       <volumeref ref="dettop_logic"/>
+       <position name="kryptoEndDS_pos" unit="mm" x="0" y="19606.9+10000" z="0"/>
       </physvol>
      
       <physvol name="dumpTempShield_left">
